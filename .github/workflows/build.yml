@@ -1,0 +1,23 @@
+name: build
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Build with CC65
+      shell: bash
+      run: |
+        sudo apt install cc65
+        bash build.sh
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: blueretro__test_rom_snes
+        path: |
+          blueretro.sfc
+        if-no-files-found: error
