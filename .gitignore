@@ -1,0 +1,5 @@
+*.o
+*.dbg
+*.map
+*.sym
+*.lnk
