@@ -125,6 +125,7 @@ Based on:\
 SNES Mouse test, by Brad Smith 2019\
 Updated for SNES: 2022\
 http://rainwarrior.ca \
+https://github.com/bbbradsmith/SNES_stuff \
 NES version:\
 https://forums.nesdev.org/viewtopic.php?p=231608#p231608
 
