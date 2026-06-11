@@ -22,6 +22,7 @@ ppu_post_mode: .res 1
 _byte_cnt:     .res 1
 _input:        .res 16
 _output:       .res 16
+ITemp:         .res 8
 
 ; 4 convenient index values, in 3 variable sizes
 _i:    .res 4
@@ -77,6 +78,11 @@ _oam: .res 256
 	POST_UPDATE = 3
 .endenum
 
+JOYOUT := $4016
+JOYSER0 := $4016
+JOYSER1 := $4017
+WRIO := $4201
+
 ; =====
 ; Tiles
 ; =====
@@ -95,32 +101,64 @@ _sprite_chr: .incbin "sprite.chr"
 .segment "CODE"
 
 _input_poll:
-	; strobe
-	ldy #1
-	sty $4016
-	dey
-	sty $4016
-	ldx #0
+    rep #$30
+    .a16
+    .i16
+    stz ITemp
+    stz ITemp+2
+    stz ITemp+4
+    stz ITemp+6
+
+    sep #$30
+    .a8
+    .i8
+    lda _output+2
+    sta ITemp+2
+    lda _output+3
+    sta ITemp+3
+
+    ldy #1
+    sty JOYOUT
+    dey
+    sty JOYOUT
+    ldx #0
+
 @poll_byte:
-	ldy #8
-	:
-		rol _output+0, X
-		ror
-		rol _output+8, X
-		ror
-		sta $4201
-		lda $4016
-		ror
-		rol _input+0, X
-		lda $4017
-		ror
-		rol _input+8, X
-		dey
-		bne :-
-	inx
-	cpx _byte_cnt
-	bcc @poll_byte
-	rts
+    ldy #8
+
+:
+    asl ITemp, X
+    ror
+    lsr
+    sta WRIO
+    lda JOYSER0
+    and #1
+    ora ITemp, X
+    sta ITemp, X
+    dey
+    bne :-
+
+    inx
+    cpx #$08
+    bcc @poll_byte
+
+    rep #$30
+    .a16
+    .i16
+    lda ITemp
+    sta _input
+    lda ITemp+2
+    sta _input+2
+    lda ITemp+4
+    sta _input+4
+    lda ITemp+6
+    sta _input+6
+    
+    sep #$30
+    .a8
+    .i8
+
+    rts
 
 ; =====================
 ; NES hardware handling
